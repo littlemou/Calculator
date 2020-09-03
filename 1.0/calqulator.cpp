@@ -9,6 +9,8 @@
 #include <map>
 #include <QApplication>
 #include <queue>
+#include <QString>
+#include <iostream>
 Calqulator::Calqulator(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Calqulator)
@@ -19,13 +21,11 @@ Calqulator::Calqulator(QWidget *parent) :
     ui->lineEdit->setText("0");
     waitforoperand=true;//等待计算
     connectslots();
-    setshortcutkeys();//设置快捷键
 }
 Calqulator::~Calqulator()
 {
     delete ui;
 }
-
 void Calqulator::abortoperation()//中止函数
 {
     ui->lineEdit->setText("0");
@@ -33,7 +33,6 @@ void Calqulator::abortoperation()//中止函数
     QMessageBox::warning(this,"运算错误","wrong!");
 
 }
-
 void Calqulator::connectslots()//将按钮与信号连接
 {
     QPushButton *digitalbtn[10]={ui->digitalbtn0,ui->digitalbtn1,ui->digitalbtn2
@@ -57,12 +56,8 @@ void Calqulator::connectslots()//将按钮与信号连接
     connect(ui->backbtn,&QPushButton::clicked,this,&Calqulator::back_clicked);
     connect(ui->allclearbtn,&QPushButton::clicked,this,&Calqulator::allclear_clicked);
     connect(ui->pointbtn,&QPushButton::clicked,this,&Calqulator::point_clicked);
+    connect(ui->binbtn,&QPushButton::clicked,this,&Calqulator::binary_clicked);
 }
-void Calqulator::setshortcutkeys()
-{
-
-}
-
 void Calqulator::digital_clicked()//字符串输入显示 60
 {
     QPushButton *digitbtn=static_cast<QPushButton*>(sender());//判断发出对象????
@@ -81,7 +76,6 @@ void Calqulator::digital_clicked()//字符串输入显示 60
         ui->lineEdit->setText(ui->lineEdit->text()+value);//所有的一起输出
     }
 }
-
 void Calqulator::operator_clicked()//60
 {
     QPushButton *operatorbtn=qobject_cast<QPushButton*>(sender());//?????
@@ -97,7 +91,6 @@ void Calqulator::operator_clicked()//60
         ui->lineEdit->setText(ui->lineEdit->text()+value);
     }
 }
-
 void Calqulator::specialoperator_clicked()
 {
     QPushButton *specialoperatorbtn=static_cast<QPushButton*>(sender());
@@ -113,27 +106,31 @@ void Calqulator::specialoperator_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+value);
     }
 }
-
 void Calqulator::equal_clicked()
 {
     double result=0;
-    try//捕捉异常
+    int number;
+    QString value=ui->lineEdit->text();//value之后会是二进制转换之后的字符串
+    for(int i=0;i<value.length();i++)
     {
-
-        result=compute(intopost(ui->lineEdit->text()));//自写函数
+        if(value[i]=='b')
+        {
+            int bin=i+1;
+            for(number=0;value[bin]=='0'||value[bin]=='1';bin++)
+            {
+                number++;
+            }
+            QString str=value.mid(i+1,number);//二进制字符串
+            qDebug()<<str;
+            int binstr_dec=str.toInt(&ok_change,10);
+            value=value.replace(i-1,i+1+number,binstr_dec);//用str替换i-1到i+1+number的字符
+        }
     }
-    catch(const char *er)//捕捉异常
-    {
-        error=er;
-        abortoperation();//中断
-        return;
-
-    }
+    result=compute(intopost(value));//自写函数
     ui->lineEdit->setText((ui->lineEdit->text()+'='+QString::number(result)));
     log=ui->lineEdit->text();//string
     waitforoperand=true;//重置
 }
-
 void Calqulator::back_clicked()//回车
 {
     QString value=ui->lineEdit->text();
@@ -147,18 +144,34 @@ void Calqulator::back_clicked()//回车
         waitforoperand=true;
     }
 }
-
 void Calqulator::allclear_clicked()//清0
 {
     ui->lineEdit->setText("0");
     waitforoperand=true;
 }
-
 void Calqulator::point_clicked()
 {
     if(waitforoperand==false&&ui->lineEdit->text().data()[ui->lineEdit->text().size()-1].isDigit()==true)
     {
         ui->lineEdit->setText(ui->lineEdit->text()+".");
+    }
+}
+void Calqulator::binary_clicked()
+{
+    QPushButton *digitbtn=static_cast<QPushButton*>(sender());//判断发出对象
+    QString value=digitbtn->text();
+    if(ui->lineEdit->text()=="0"&&value=="0")//初始为0则不动
+    {
+        return;
+    }
+    if(waitforoperand==true)//如果输入框为空
+    {
+        ui->lineEdit->setText(value);
+        waitforoperand=false;
+    }
+    else
+    {
+        ui->lineEdit->setText(ui->lineEdit->text()+value);//所有的一起输出
     }
 }
 int Calqulator::priority(char a)//判断优先级函数
@@ -183,6 +196,29 @@ int Calqulator::priority(char a)//判断优先级函数
         return 3;
     if(a=='g')
         return 3;
+}
+QString Calqulator::bin_change(QString s)
+{
+//    qDebug()<<"bin_change";
+//    int times=1;
+//    int sum=0;
+//    for(int i=s.length()-1;i>=0;i--)
+//    {
+//        int tempnum=s[i]-'0';
+//       sum=sum+tempnum*times;
+//        times=times*2;
+//    }
+//    qDebug()<<sum;
+//    QString dec_str;
+//    for(;sum>0;)
+//    {
+//        int mod=sum%10;
+//        sum=sum/10;
+//        char element=mod+0x30;
+//        dec_str.push_front(element);
+//    }
+//    qDebug()<<dec_str;
+//    return dec_str;
 }
 QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛出char*异常
 {
@@ -408,7 +444,7 @@ double Calqulator::compute(QString s) throw (const char*)
         {
             if(str.isEmpty())
             continue;
-            outcome=str.toDouble();
+            outcome=str.toDouble();//同时可以将多位数转变为正常数字
             str.clear();
             stack.push(outcome);
             qDebug()<<outcome;
