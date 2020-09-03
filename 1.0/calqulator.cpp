@@ -116,9 +116,10 @@ void Calqulator::specialoperator_clicked()
 
 void Calqulator::equal_clicked()
 {
-    double result=0.0;
+    double result=0;
     try//捕捉异常
     {
+
         result=compute(intopost(ui->lineEdit->text()));//自写函数
     }
     catch(const char *er)//捕捉异常
@@ -160,38 +161,52 @@ void Calqulator::point_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+".");
     }
 }
-
+int Calqulator::priority(char a)//判断优先级函数
+{
+    if(a=='+')
+        return 0;
+    if(a=='-')
+        return 0;
+    if(a=='*')
+        return 1;
+    if(a=='/')
+        return 1;
+    if(a=='^')
+        return 2;
+    if(a=='s')
+        return 3;
+    if(a=='c')
+        return 3;
+    if(a=='t')
+        return 3;
+    if(a=='n')
+        return 3;
+    if(a=='g')
+        return 3;
+}
 QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛出char*异常
 {
     std::stack<char>stack;
     char current;//未初始化0
     QString postfix;//后缀数组
-    std::map<char,int> priority;//设置优先级
-    priority['+']=0;
-    priority['-']=0;
-    priority['*']=1;
-    priority['/']=1;//60
-    priority['^']=2;
-    priority['s']=3;
-    priority['c']=3;
-    priority['t']=3;
-    priority['n']=3;
-    priority['g']=3;
-
+    qDebug()<<infix;
     for(int i=0;i<infix.length();i++)
     {
         current=infix[i].toLatin1();//转换为数字或者运算符
         if(isdigit(current))//先将数字放入后缀
         {
             postfix.push_back(current);//依次放入后缀数组
+            qDebug()<<"digit: "<<current;
+            qDebug()<<postfix;
             continue;
         }
         //将运算符放入后缀
+        qDebug()<<"operator: "<<current;
         if(current=='+'||current=='-'||current=='*'||current=='/'||current=='^')//
         {
             if(infix[i-1]!='(')
             {
-                if(infix[i-1].isDigit()==true)//判断最后一个字符是否合法
+                if(infix[i-1].isDigit()==true)//数字后放一个#隔开
                 {
                     postfix.push_back('#');
                 }
@@ -208,23 +223,22 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
             if(stack.empty()==false)
             {
                 char temptop=stack.top();
-                for(;temptop!='('&&priority[current]<priority[temptop];)//
+                for(;temptop!='('&&priority(current)<=priority(temptop);)//<还是<=???
                 {
                     stack.pop();
                     postfix.push_back(temptop);
-                    if(stack.empty()==false)
+                    if(stack.empty())
                     {
                         break;
                     }
                     temptop=stack.top();
                 }
-
             }
             stack.push(current);
+            qDebug()<<postfix;
             continue;
         }//+-*/结束,60分内容之一
-        //
-        if(current=='s'||current=='c'||current=='t')
+        if(current=='s'||current=='c'||current=='t')//sin,cos,tan
         {
             if(i>0&&infix[i-1].isDigit()==true)
             {
@@ -233,7 +247,7 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
             if(stack.empty()==false)
             {
                 char temtop=stack.top();
-                for(;temtop!='('&&priority[current]<priority[temtop];)
+                for(;temtop!='('&&priority(current)<priority(temtop);)
                 {
                     stack.pop();
                     postfix.push_back(temtop);
@@ -247,8 +261,8 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
             stack.push(current);
             i+=2;
             continue;
-        }//sin\cos\tan结束
-        if(current=='l')
+        }
+        if(current=='l')//ln,lg
         {
             if(i>0&&infix[i-1].isDigit()==true)
             {
@@ -257,7 +271,7 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
             if(stack.empty()==false)
             {
                 char temptop=stack.top();
-                for(;temptop!='('&&priority[current]<priority[temptop];)
+                for(;temptop!='('&&priority(current)<priority(temptop);)
                 {
                     stack.pop();
                     postfix.push_back(temptop);
@@ -271,7 +285,7 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
             stack.push(current);
             i++;
             continue;
-        }//ln\lg结束
+        }
         if(current=='.')
         {
             postfix.push_back(current);
@@ -309,23 +323,28 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
         continue;
     }
     if(infix[infix.size()-1]!=')')
+    {
+        if(infix[infix.size()-1].isDigit())
         {
-            if(infix[infix.size()-1].isDigit())
-                postfix.push_back('#');
-            else if(infix[infix.size()-1]=='%')
-            {}
-            else
-                throw "expression is illegality";
+            postfix.push_back('#');
+        }
+        else if(infix[infix.size()-1]=='%')
+        {
 
         }
-        while(stack.empty()==false)
+        else
         {
-            char tempOut=stack.top();
-            stack.pop();
-            postfix.push_back(tempOut);
+            throw "expression is illegality";
         }
-
-        return postfix;
+    }
+    while(stack.empty()==false)
+    {
+        char temptop=stack.top();
+        stack.pop();
+        postfix.push_back(temptop);
+    }
+    qDebug()<<postfix;
+    return postfix;
 }
 double Calqulator::compute(QString s) throw (const char*)
 {
@@ -351,6 +370,8 @@ double Calqulator::compute(QString s) throw (const char*)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num1+num2);
+                qDebug()<<num1<<"+"<<num2<<"="<<num1+num2;
+                continue;
             }
             if(oper=='-')
             {
@@ -358,7 +379,9 @@ double Calqulator::compute(QString s) throw (const char*)
                 stack.pop();
                 num2=stack.top();
                 stack.pop();
-                stack.push(num1-num2);
+                stack.push(num2-num1);
+                qDebug()<<num2<<"-"<<num1<<"="<<num2-num1;
+                continue;
             }
             if(oper=='*')
             {
@@ -367,6 +390,8 @@ double Calqulator::compute(QString s) throw (const char*)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num1*num2);
+                qDebug()<<num1<<"*"<<num2<<"="<<num1*num2;
+                continue;
             }
             if(oper=='/')
             {
@@ -374,12 +399,24 @@ double Calqulator::compute(QString s) throw (const char*)
                 stack.pop();
                 num2=stack.top();
                 stack.pop();
-                stack.push(num1/num2);
+                stack.push(num2/num1);
+                qDebug()<<num2<<"/"<<num1<<"="<<num2/num1;
+                continue;
             }
         }
+        if(oper=='#')
+        {
+            if(str.isEmpty())
+            continue;
+            outcome=str.toDouble();
+            str.clear();
+            stack.push(outcome);
+            qDebug()<<outcome;
+            continue;
+        }
         throw "illeaglity";
-
     }
     outcome=stack.top();
+    qDebug()<<outcome;
     return outcome;
 }
