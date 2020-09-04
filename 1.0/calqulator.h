@@ -27,6 +27,8 @@ private slots://未完全
     void digital_clicked();
     void allclear_clicked();
     void binary_clicked();
+    void hex_clicked();
+    void return_clicked();
 
 private:
     Ui::Calqulator *ui;
@@ -37,10 +39,10 @@ private:
     bool waitforoperand;
     QString intopost(QString infix) throw (const char*);//转变为后缀表达式
     double compute(QString s) throw (const char*);//计算后缀表达式结果
-    QString bin_change(QString s);
+    QString bin_change(int i,QString value);
+    QString hex_change(int i,QString value);
     int priority(char a);
     QString error;
-    QString log;
 
 };
 
