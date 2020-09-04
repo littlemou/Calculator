@@ -57,6 +57,7 @@ void Calqulator::connectslots()//将按钮与信号连接
     connect(ui->pointbtn,&QPushButton::clicked,this,&Calqulator::point_clicked);
     connect(ui->binbtn,&QPushButton::clicked,this,&Calqulator::binary_clicked);
     connect(ui->hexbtn,&QPushButton::clicked,this,&Calqulator::hex_clicked);
+    connect(ui->comparebtn,&QPushButton::clicked,this,&Calqulator::compare_clicked);
 }
 void Calqulator::digital_clicked()//字符串输入显示 60
 {
@@ -91,6 +92,12 @@ void Calqulator::operator_clicked()//60
         waitforoperand=false;
     }
     else
+    if(waitforoperand==true&&value=="-")
+    {
+        ui->lineEdit->setText(value);
+        waitforoperand=false;
+    }
+    else
     if(waitforoperand==false)
     {
         ui->lineEdit->setText(ui->lineEdit->text()+value);
@@ -116,6 +123,20 @@ void Calqulator::specialoperator_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+value);
     }
 }
+void Calqulator::compare_clicked()
+{
+    QString str=ui->lineEdit->text();
+    if(waitforoperand==false)
+    {
+        ui->lineEdit->setText(str+" "+ui->comparebtn->text()+" ");
+    }
+    connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::compare_equal_clicked);
+}
+void Calqulator::compare_equal_clicked()
+{
+    for(int )
+    connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::equal_clicked);
+}
 void Calqulator::equal_clicked()
 {
     double result=0;
@@ -128,9 +149,10 @@ void Calqulator::equal_clicked()
         }
         if(value[i]=='x')
         {
-            value=hex_change(i,value);
+            value=hex_change(i,value);//将16进制字符转换为相应的十进制字符
         }
     }
+    qDebug()<<value;
     //bao错并计算
     try
     {
@@ -214,6 +236,7 @@ void Calqulator::hex_clicked()
     ui->cosbtn->setText("E");
     ui->tanbtn->setText("F");
 }
+
 void Calqulator::return_clicked()
 {
     ui->pawbtn->setText("^");
@@ -322,15 +345,22 @@ QString Calqulator::hex_change(int i,QString value)
 }
 QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛出char*异常
 {
+//    infix=point_change(infix);
     std::stack<char>stack;
     char current;//未初始化0
     QString postfix;//后缀数组
+    if(infix[0]=='-')
+    {
+        infix.push_front('0');
+    }
+    qDebug()<<postfix;
     for(int i=0;i<infix.length();i++)
     {
         current=infix[i].toLatin1();//转换为数字或者运算符
-        if(isdigit(current))//先将数字放入后缀
+        if(isdigit(current))//将数字放入后缀
         {
             postfix.push_back(current);//依次放入后缀数组
+            qDebug()<<postfix;
             continue;
         }
         //将运算符放入后缀
@@ -348,9 +378,17 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
 
                     }
                 else
+                    if(infix[i-1]==')')
+                    {
+                        stack.push(current);
+                        continue;
+                    }
+                else
                     {
                         throw "Syntax Error";
                     }
+               // else
+                //if(infix=='')
             }
             if(stack.empty()==false)
             {
@@ -359,6 +397,7 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
                 {
                     stack.pop();
                     postfix.push_back(temptop);
+                    qDebug()<<postfix;
                     if(stack.empty())
                     {
                         break;
@@ -425,7 +464,7 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
         }
         if(current=='%')
         {
-            postfix.push_back('#');
+           postfix.push_back('#');
             postfix.push_back(current);
             continue;
         }
@@ -436,19 +475,23 @@ QString Calqulator::intopost(QString infix) throw (const char*)//throw可能抛�
         }
         if(current==')')
         {
+            qDebug()<<"处理反括号";
             if(infix[i-1]!='%')
             {
                 postfix.push_back('#');
             }
+            qDebug()<<postfix;
             char temtop;
             temtop=stack.top();
             for(;temtop!='(';)
             {
                 stack.pop();
                 postfix.push_back(temtop);
+                qDebug()<<postfix;
                 temtop=stack.top();
             }
             stack.pop();
+            qDebug()<<"处理反括号";
             continue;
         }
         throw "Syntax Error";
@@ -493,7 +536,7 @@ double Calqulator::compute(QString s) throw (const char*)
             continue;
         }
         auto oper=s[i].toLatin1();
-        if(oper=='+'||oper=='-'||oper=='*'||oper=='/')
+        if(oper=='+'||oper=='-'||oper=='*'||oper=='/'||oper=='^')
         {
             if(oper=='+')
             {
@@ -529,6 +572,15 @@ double Calqulator::compute(QString s) throw (const char*)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num2/num1);
+                continue;
+            }
+            if(oper=='^')
+            {
+                num1=stack.top();
+                stack.pop();
+                num2=stack.top();
+                stack.pop();
+                stack.push(pow(num2,num1));
                 continue;
             }
         }
@@ -573,6 +625,11 @@ double Calqulator::compute(QString s) throw (const char*)
                 stack.push(std::log10(num1));
                 continue;
             }
+        }
+        if(oper=='.')
+        {
+            str.push_back('.');
+            continue;
         }
         if(oper=='#')
         {

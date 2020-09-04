@@ -21,6 +21,7 @@ public:
 private slots://未完全
     void back_clicked();//AC
     void equal_clicked();//=
+    void compare_equal_clicked();
     void point_clicked();//.
     void operator_clicked();//
     void specialoperator_clicked();
@@ -29,7 +30,7 @@ private slots://未完全
     void binary_clicked();
     void hex_clicked();
     void return_clicked();
-
+    void compare_clicked();
 private:
     Ui::Calqulator *ui;
 
@@ -43,7 +44,6 @@ private:
     QString hex_change(int i,QString value);
     int priority(char a);
     QString error;
-
 };
 
 #endif // CALQULATOR_H
