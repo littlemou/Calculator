@@ -8,9 +8,7 @@ int main(int argc, char *argv[])
     font.setPointSize(15);
     a.setFont(font);
     Calqulator w;
-
     w.move(200,0);
     w.show();
-
     return a.exec();
 }
