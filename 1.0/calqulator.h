@@ -39,7 +39,18 @@ private slots://未完全
     void bfunction_2_clicked();
     void cfunction_2_clicked();
     void function_2_equal_clidcked();
-private:
+    void yfunction_a_x_clicked();
+    void afunction_a_x_clicked();
+    void function_a_x_equal_clicked();
+    void yinversefunction_clicked();
+    void kinversefunction_clicked();
+    void inversefunction_equal_clicked();
+    void tofunction_clicked();
+    void return_tofunction_clicked();
+    void specialoperator_2_clicked();
+    void specialoperator_2_equal_clicked();
+    void tofunction_B_clicked();
+    private:
     Ui::Calqulator *ui;
     void abortoperation();//中止
     void connectslots();//链接信号
