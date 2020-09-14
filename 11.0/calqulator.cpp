@@ -1,3 +1,4 @@
+
 #include "calqulator.h"
 #include "ui_calqulator.h"
 #include <QPushButton>
@@ -12,6 +13,7 @@
 #include <queue>
 #include <QString>
 #include "form.h"
+
 Calqulator::Calqulator(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Calqulator)
@@ -25,6 +27,7 @@ Calqulator::Calqulator(QWidget *parent) :
     void(Form::*funslot1)()=&Form::slot1;
     connect(&w,funslot1,this,&Calqulator::allclear_clicked);
 }
+
 Calqulator::~Calqulator()
 {
     delete ui;
@@ -45,6 +48,7 @@ void Calqulator::abortoperation()//中止函数
     disconnect(ui->inversefunction,0,0,0);
     connect(ui->inversefunction,&QPushButton::clicked,this,&Calqulator::yinversefunction_clicked);
 }
+
 void Calqulator::connectslots()//将按钮与信号连接
 {
     QPushButton *digitalbtn[10]={ui->digitalbtn0,ui->digitalbtn1,ui->digitalbtn2
@@ -82,6 +86,7 @@ void Calqulator::connectslots()//将按钮与信号连接
     connect(ui->cs_window,&QPushButton::clicked,this,&Calqulator::cswidow_clicked);
     connect(ui->memory,&QPushButton::clicked,this,&Calqulator::memory_clicked);
 }
+
 void Calqulator::digital_clicked()//字符串输入显示 60
 {
     qDebug()<<"进如此循环";
@@ -97,6 +102,7 @@ void Calqulator::digital_clicked()//字符串输入显示 60
         ui->lineEdit->setText(ui->lineEdit->text()+value);//所有的一起输出
     }
 }
+
 void Calqulator::operator_clicked()//60
 {
     QPushButton *operatorbtn=qobject_cast<QPushButton*>(sender());//?????
@@ -123,6 +129,7 @@ void Calqulator::operator_clicked()//60
         ui->lineEdit->setText(ui->lineEdit->text()+value);
     }
 }
+
 void Calqulator::specialoperator_clicked()
 {
     QPushButton *specialoperatorbtn=static_cast<QPushButton*>(sender());
@@ -138,16 +145,19 @@ void Calqulator::specialoperator_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+value);
     }
 }
+
 void Calqulator::cswidow_clicked()
 {
     w.show();
     w.setWindowTitle("Conversion Window");
     w.move(0,300);
 }
+
 void Calqulator::sendsignal()
 {
     w.setline(ui->lineEdit->text());
 }
+
 void Calqulator::memory_clicked()
 {
     if(memory=="wrong222")
@@ -162,6 +172,7 @@ void Calqulator::memory_clicked()
         waitforoperand=true;
     }
 }
+
 void Calqulator::compare_clicked()
 {
     disconnect(ui->equalbtn,0,0,0);
@@ -178,6 +189,7 @@ void Calqulator::compare_clicked()
     }
     connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::compare_equal_clicked);//接入新信号
 }
+
 void Calqulator::compare_equal_clicked()
 {
 
@@ -246,6 +258,7 @@ void Calqulator::compare_equal_clicked()
         }
     }
 }
+
 void Calqulator::equal_clicked()
 {
     double result=0.0;
@@ -262,7 +275,7 @@ void Calqulator::equal_clicked()
     }
     else
     {
-        qDebug()<<"执行正常等于号";
+        qDebug()<<"执行正常等于号000";
         double result=0;
         QString value=ui->lineEdit->text();//value之后会是二进制转换之后的字符串
         //bao错并计算
@@ -276,12 +289,28 @@ void Calqulator::equal_clicked()
             abortoperation();
             return;
         }
-        ui->lineEdit->setText((ui->lineEdit->text()+'='+QString::number(result)));
+        if(trans=="hex")
+        {
+            int resulthex=int(result);
+            ui->lineEdit->setText(ui->lineEdit->text()+" = "+"0x"+QString::number(resulthex,16));
+            memory=ui->lineEdit->text();
+            waitforoperand=true;//重置
+            return;
+        }
+        else if(trans=="bin")
+        {
+            int resultbin=int(result);
+            ui->lineEdit->setText(ui->lineEdit->text()+" = "+"0b"+QString::number(resultbin,2));
+            memory=ui->lineEdit->text();
+            waitforoperand=true;//重置
+            return;
+        }
+        ui->lineEdit->setText(ui->lineEdit->text()+" = "+QString::number(result));
         memory=ui->lineEdit->text();
         waitforoperand=true;//重置
     }
-
 }
+
 void Calqulator::back_clicked()//回车
 {
     QString value=ui->lineEdit->text();
@@ -295,6 +324,7 @@ void Calqulator::back_clicked()//回车
         waitforoperand=true;
     }
 }
+
 void Calqulator::allclear_clicked()//清0
 {
     ui->lineEdit->setText("0");
@@ -310,6 +340,7 @@ void Calqulator::allclear_clicked()//清0
     connect(ui->inversefunction,&QPushButton::clicked,this,&Calqulator::yinversefunction_clicked);
     w.clear();
 }
+
 void Calqulator::point_clicked()
 {
     if(waitforoperand==false&&ui->lineEdit->text().data()[ui->lineEdit->text().size()-1].isDigit()==true)
@@ -317,6 +348,7 @@ void Calqulator::point_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+".");
     }
 }
+
 void Calqulator::binary_clicked()
 {
     QPushButton *binbtn=static_cast<QPushButton*>(sender());//判断发出对象
@@ -335,6 +367,7 @@ void Calqulator::binary_clicked()
         ui->lineEdit->setText(ui->lineEdit->text()+value);//所有的一起输出
     }
 }
+
 void Calqulator::hex_clicked()
 {
     QPushButton *hexbtn=static_cast<QPushButton*>(sender());
@@ -364,10 +397,12 @@ void Calqulator::hex_clicked()
         ui->cosbtn->setText("E");
         ui->tanbtn->setText("F");
 }
+
 void Calqulator::tofunction_B_clicked()
 {
     ui->lineEdit->setText(ui->lineEdit->text()+"B");
 }
+
 void Calqulator::return_clicked()
 {
     disconnect(ui->pawbtn,0,0,0);
@@ -382,6 +417,7 @@ void Calqulator::return_clicked()
     ui->tanbtn->setText("tan");
     connect(ui->pawbtn,&QPushButton::clicked,this,&Calqulator::operator_clicked);
 }
+
 void Calqulator::common_divisorbtn_clicked()
 {
     disconnect(ui->equalbtn,0,0,0);
@@ -398,6 +434,7 @@ void Calqulator::common_divisorbtn_clicked()
         return;
     }
 }
+
 void Calqulator::common_divisorbtn_equal_clicked()
 {
     disconnect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::common_divisorbtn_equal_clicked);
@@ -442,6 +479,7 @@ void Calqulator::common_divisorbtn_equal_clicked()
         }
     }
 }
+
 void Calqulator::least_common_multiple_clicked()
 {
     disconnect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::equal_clicked);
@@ -458,6 +496,7 @@ void Calqulator::least_common_multiple_clicked()
         return;
     }
 }
+
 void Calqulator::least_common_multiple_equal_clicked()
 {
     disconnect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::least_common_multiple_equal_clicked);
@@ -500,6 +539,7 @@ void Calqulator::least_common_multiple_equal_clicked()
     memory=ui->lineEdit->text();
     waitforoperand=true;
 }
+
 void Calqulator::afunction_2_clicked()
 {
     if(waitforoperand==true&&ui->lineEdit->text()=="0")
@@ -518,6 +558,7 @@ void Calqulator::afunction_2_clicked()
         return;
     }
 }
+
 void Calqulator::bfunction_2_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -533,6 +574,7 @@ void Calqulator::bfunction_2_clicked()
         return;
     }
 }
+
 void Calqulator::cfunction_2_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -548,6 +590,7 @@ void Calqulator::cfunction_2_clicked()
         return;
     }
 }
+
 void Calqulator::function_2_equal_clidcked()
 {
     QString value=ui->lineEdit->text();
@@ -649,6 +692,7 @@ void Calqulator::function_2_equal_clidcked()
     connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::equal_clicked);
     ui->equalbtn->setText("=");
 }
+
 void Calqulator::yfunction_a_x_clicked()
 {
     if(waitforoperand==true&&ui->lineEdit->text()=="0")
@@ -667,6 +711,7 @@ void Calqulator::yfunction_a_x_clicked()
         return;
     }
 }
+
 void Calqulator::afunction_a_x_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -682,6 +727,7 @@ void Calqulator::afunction_a_x_clicked()
         return;
     }
 }
+
 void Calqulator::function_a_x_equal_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -722,6 +768,7 @@ void Calqulator::function_a_x_equal_clicked()
     connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::equal_clicked);
     ui->equalbtn->setText("=");
 }
+
 void Calqulator::yinversefunction_clicked()
 {
     if(waitforoperand==true&&ui->lineEdit->text()=="0")
@@ -740,6 +787,7 @@ void Calqulator::yinversefunction_clicked()
         return;
     }
 }
+
 void Calqulator::kinversefunction_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -755,6 +803,7 @@ void Calqulator::kinversefunction_clicked()
         return;
     }
 }
+
 void Calqulator::inversefunction_equal_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -789,6 +838,7 @@ void Calqulator::inversefunction_equal_clicked()
     ui->lineEdit->setText(value+" -> "+QString::number(y_digital,'g',6)+"="+QString::number(k_digital,'g',6)+"/x"+" x="+QString::number(k_digital/y_digital,'g',6));
     memory=ui->lineEdit->text();
 }
+
 void Calqulator::tofunction_clicked()
 {
     disconnect(ui->tofunction,0,0,0);
@@ -813,6 +863,7 @@ void Calqulator::tofunction_clicked()
             connect(btn,&QPushButton::clicked,this,&Calqulator::specialoperator_2_clicked);
     }
 }
+
 void Calqulator::return_tofunction_clicked()
 {
     disconnect(ui->tofunction,0,0,0);
@@ -832,6 +883,7 @@ void Calqulator::return_tofunction_clicked()
     for(auto btn:specialoperatorbtn)//ln,lg,sin,cos,tan,e^x
         connect(btn,&QPushButton::clicked,this,&Calqulator::specialoperator_clicked);
 }
+
 void Calqulator::specialoperator_2_clicked()
 {
     QPushButton *specialoperatorbtn=static_cast<QPushButton*>(sender());
@@ -851,6 +903,7 @@ void Calqulator::specialoperator_2_clicked()
         ui->equalbtn->setText("F=");
     }
 }
+
 void Calqulator::specialoperator_2_equal_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -908,6 +961,7 @@ void Calqulator::specialoperator_2_equal_clicked()
     memory=ui->lineEdit->text();
     waitforoperand=true;
 }
+
 void Calqulator::hyp_clicked()
 {
     if(ui->sinbtn->text()=="y=sinx")
@@ -928,6 +982,7 @@ void Calqulator::hyp_clicked()
         connect(btn,&QPushButton::clicked,this,&Calqulator::specialoperator_h_clicked);
     }
 }
+
 void Calqulator::specialoperator_2h_clicked()
 {
     QPushButton *digitbtn=static_cast<QPushButton*>(sender());//判断发出对象????
@@ -947,6 +1002,7 @@ void Calqulator::specialoperator_2h_clicked()
         return;
     }
 }
+
 void Calqulator::specialoperator_2h_equal_clicked()
 {
     QString value=ui->lineEdit->text();
@@ -991,6 +1047,7 @@ void Calqulator::specialoperator_2h_equal_clicked()
     disconnect(ui->equalbtn,0,0,0);
     connect(ui->equalbtn,&QPushButton::clicked,this,&Calqulator::equal_clicked);
 }
+
 void Calqulator::hyp_return_clicked()
 {
     disconnect(ui->hypbtn,0,0,0);
@@ -1009,6 +1066,7 @@ void Calqulator::hyp_return_clicked()
         specialoperatorbtn[i]->setText(specialoperatorbtn[i]->text().left(specialoperatorbtn[i]->text().size()-1));
     }
 }
+
 void Calqulator::specialoperator_h_clicked()
 {
     QPushButton *specialoperatorbtn=static_cast<QPushButton*>(sender());
@@ -1026,6 +1084,7 @@ void Calqulator::specialoperator_h_clicked()
     waitforoperand=false;
     qDebug()<<"waitforoperand变为false";
 }
+
 int Calqulator::priority(char a)//判断//优先级函数
 {
     if(a=='+')
@@ -1049,6 +1108,7 @@ int Calqulator::priority(char a)//判断//优先级函数
     if(a=='g')
         return 3;
 }
+
 QString Calqulator::bin_change(int i,QString value)
 {
     int bin=i+1;
@@ -1082,6 +1142,7 @@ QString Calqulator::bin_change(int i,QString value)
     value=value.replace(i-1,number+2,bin_dec);//用bin_dec替换i-1到i+1+number的字符
     return value;
 }
+
 QString Calqulator::hex_change(int i,QString value)
 {
     int bin=i+1;
@@ -1125,12 +1186,95 @@ QString Calqulator::hex_change(int i,QString value)
     value.replace(i-1,number+2,hex_dec);//用hex_dec替换i-1到i+1+number的字符
     return value;
 }
+
 QString Calqulator::intopost(QString infix)//throw可能抛出char*异常
 {
     if(flag=="flag")
     {
         qDebug()<<"ta2";
         return flag;
+    }
+    int flag1=0;
+    int flagbin=0;
+    int flaghex=0;
+    int flagdec=0;
+    for(int i=0;i<infix.length();i++)
+    {
+        if(infix[i]=='0')
+        {
+            if(infix[i+1]=='b'||infix[i+1]=='x')
+            {
+                flag1=1;
+                if(infix[i+1]=='b')
+                {
+                    for(int j=i+2;j<infix.length();j++)
+                    {
+                        if(infix[j]=='1'||infix[j]=='0')
+                        {
+                            flagbin=1;
+                            qDebug()<<j<<"flagbin=1;";
+                            i=j;
+                            continue;
+                        }
+                        else
+                        {
+                            i=j;
+                            break;
+                        }
+                    }
+                }
+                else
+                if(infix[i+1]=='x')
+                {
+                    for(int j=i+2;j<infix.length();j++)
+                    {
+                        if((infix[j]>='0'&&infix[j]<='9')||(infix[j]>='A'&&infix[j]<='F'))
+                        {
+                            flaghex=1;
+                            qDebug()<<j<<"flaghex=1;";
+                            i=j;
+                            continue;
+                        }
+                        else
+                        {
+                            i=j;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if(flag1==1)
+                {
+                    flag1=0;
+                    continue;
+                }
+                else
+                {
+                    flagdec=1;
+                    qDebug()<<i<<"flagdec=1;";
+                }
+            }
+        }
+        else
+        if(infix[i].isDigit()==true)
+        {
+           flagdec=1;
+           qDebug()<<i<<"外flagdec=1;";
+        }
+    }
+    if(flagbin==1&&flaghex==0&&flagdec==0)
+    {
+        trans="bin";
+    }
+    else if(flagbin==0&&flaghex==1&&flagdec==0)
+    {
+        trans="hex";
+    }
+    else
+    {
+        trans="dec";
     }
     std::stack<char>stack;
     char current;//未初始化0
@@ -1401,6 +1545,7 @@ QString Calqulator::intopost(QString infix)//throw可能抛出char*异常
     }
     return postfix;
 }
+
 double Calqulator::compute(QString s)
 {
     if(s=="flag")

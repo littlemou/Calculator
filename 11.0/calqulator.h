@@ -73,6 +73,7 @@ private:
     QString error;
     QString memory="wrong222";
     QString flag="0";
+    QString trans="none";//判断是否为单一十六或二进制
     Form w;
     QString a;
     QString b;
