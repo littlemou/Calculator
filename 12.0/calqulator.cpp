@@ -26,7 +26,7 @@ Calqulator::Calqulator(QWidget *parent) :
     connectslots();
     void(Form::*funslot1)()=&Form::slot1;
     connect(&w,funslot1,this,&Calqulator::allclear_clicked);
-    ui->lineEdit->setReadOnly(true);
+//    ui->lineEdit->setReadOnly(true);
 }
 
 Calqulator::~Calqulator()
@@ -1549,6 +1549,7 @@ QString Calqulator::intopost(QString infix)//throw可能抛出char*异常
 
 double Calqulator::compute(QString s)
 {
+    qDebug()<<"s"<<s;
     if(s=="flag")
     {
         waitforoperand=true;
@@ -1576,6 +1577,7 @@ double Calqulator::compute(QString s)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num1+num2);
+                qDebug()<<num2<<"+"<<num1<<"="<<num2+num1;
                 continue;
             }
             if(oper=='-')
@@ -1585,6 +1587,7 @@ double Calqulator::compute(QString s)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num2-num1);
+                qDebug()<<num2<<"-"<<num1<<"="<<num2-num1;
                 continue;
             }
             if(oper=='*')
@@ -1594,6 +1597,7 @@ double Calqulator::compute(QString s)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num1*num2);
+                qDebug()<<num2<<"*"<<num1<<"="<<num2*num1;
                 continue;
             }
             if(oper=='/')
@@ -1603,6 +1607,7 @@ double Calqulator::compute(QString s)
                 num2=stack.top();
                 stack.pop();
                 stack.push(num2/num1);
+                qDebug()<<num2<<"/"<<num1<<"="<<num2/num1;
                 continue;
             }
             if(oper=='^')
@@ -1612,6 +1617,7 @@ double Calqulator::compute(QString s)
                 num2=stack.top();
                 stack.pop();
                 stack.push(pow(num2,num1));
+                qDebug()<<num2<<"^"<<num1<<"="<<pow(num2,num1);
                 continue;
             }
             if(oper=='%')
@@ -1619,6 +1625,7 @@ double Calqulator::compute(QString s)
                 num1=stack.top();
                 stack.pop();
                 stack.push(num1/10);
+                qDebug()<<num1<<"="<<num1/10;
                 continue;
             }
             if(oper=='.')
@@ -1693,6 +1700,10 @@ double Calqulator::compute(QString s)
                 stack.push(std::log10(num1));
                 continue;
             }
+        }
+        if(oper=='(')
+        {
+            continue;
         }
         if(oper=='.')
         {
