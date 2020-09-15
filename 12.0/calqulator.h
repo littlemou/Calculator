@@ -30,7 +30,10 @@ private slots:
     void binary_clicked();//二进制
     void hex_clicked();//16进制
     void return_clicked();//ABCDEF返回
-    void compare_clicked();//比较大小
+    void compareb1_clicked();//比较大小
+    void comparen1_clicked();
+    void compareb2_clicked();
+    void comparen2_clicked();
     void compare_equal_clicked();//比较大小结果
     void common_divisorbtn_clicked();//公约数
     void common_divisorbtn_equal_clicked();//公约数结果
@@ -63,7 +66,7 @@ private:
     Ui::Calqulator *ui;
     void abortoperation();//中止
     void connectslots();//链接信号
-    bool ok_change=true;
+    bool ok_change;
     bool waitforoperand;
     QString bin_change(int i,QString value);
     QString hex_change(int i,QString value);
